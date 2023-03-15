@@ -7,7 +7,7 @@ void	sig_int_handler( int i )
     (void)i;
 	write(1, "\n", 1);
     close(*FD);
-    close(*NEW_SOCKET);
+    close(*TMP_SOCKET);
 }
 
 void	redefine_signals()

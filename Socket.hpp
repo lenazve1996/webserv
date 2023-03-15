@@ -11,7 +11,7 @@
 #include <iostream>
 
 static int *FD; 
-static int *NEW_SOCKET;
+static int *TMP_SOCKET;
 
 class Socket {
 

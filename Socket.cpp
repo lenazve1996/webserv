@@ -64,7 +64,7 @@ void Socket::readRequest( void )
             perror("Accept func failed");     
             exit(EXIT_FAILURE);
         }
-		NEW_SOCKET = &tmpSocket;
+		TMP_SOCKET = &tmpSocket;
 		std::cout << "Number of the tmpSocket fd: " << tmpSocket << std::endl;
 
         char buffer[3000];
