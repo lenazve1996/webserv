@@ -1,6 +1,4 @@
-#include "Socket.hpp"
-#include "Config.hpp"
-#include <sys/types.h>
+#include "Listen.hpp"
 
 void	sig_int_handler( int i )
 {
@@ -55,7 +53,6 @@ void listenSockets(std::list<Socket *> sockets)
     std::list<Socket *>::iterator sockets_it = sockets.begin();
     for (sockets_it = sockets.begin(); sockets_it != sockets.end(); sockets_it++)
     {
-
         (*sockets_it)->listenSock();
     }
 }
@@ -68,6 +65,13 @@ void readRequests(std::list<Socket *> sockets)
         (*sockets_it)->readRequest();
     }
 }
+
+// void readRequests(std::list<Socket *> sockets)
+// {
+//     struct pollfd fds[2];
+
+    
+// }
 
 void freeSocketsList(std::list<Socket *> sockets)
 {
