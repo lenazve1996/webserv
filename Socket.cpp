@@ -13,13 +13,34 @@ Socket::Socket()
 	if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
 	{
 		perror("setsockopt for SO_REUSEADDR failed");
+        close(_fd);
 		exit(EXIT_FAILURE);
 	}
 	if (setsockopt(_fd, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(int)) < 0)
 	{
 		perror("setsockopt for SO_REUSEPORT failed");
+        close(_fd);
 		exit(EXIT_FAILURE);
 	}
+
+    // _address.sin_family = AF_INET;
+    // _address.sin_addr.s_addr = htonl(INADDR_ANY);
+    // _address.sin_port = htons(port);
+
+    // if (bind(_fd, (struct sockaddr *)&_address, sizeof(_address)) < 0)
+    // {
+    //     // freeaddrinfo(_address);
+    //     perror("bind failed"); 
+    //     close(_fd);
+    //     exit(EXIT_FAILURE);
+    // }
+
+    // if (listen(_fd, 10) > 0)
+    // {
+    //     perror("listen func failed");
+    //     close(_fd);
+    //     exit(EXIT_FAILURE);
+    // }
 }
 
 Socket::~Socket()

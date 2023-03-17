@@ -1,17 +1,19 @@
 #ifndef INFO_H
 # define INFO_H
 
+#include <list>
+
 class Config {
 
 public:
 
-    Config( int port );
+    Config( std::list<int> ports );
     ~Config();
-    int		getPort( void );
+    std::list<int>	getPorts( void );
 
 private:
 
-    int		_port;
+    std::list<int> _ports;
 
 };
 

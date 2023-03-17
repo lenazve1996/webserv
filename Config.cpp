@@ -1,13 +1,13 @@
 #include "Config.hpp"
 
-Config::Config( int port )
+Config::Config( std::list<int> ports )
 {
-    _port = port;
+    _ports = ports;
 }
 
 Config::~Config() {}
 
-int Config::getPort( void )
+std::list<int>  Config::getPorts( void )
 {
-    return _port;
+    return _ports;
 }
