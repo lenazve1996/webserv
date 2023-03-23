@@ -97,15 +97,10 @@ void Socket::readRequest( void )
         }
         std::cout << ">>>> REQUEST: <<<<" << std::endl << std::endl  << buffer;
 
-		// std::string answer;
-        // answer = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 21\n\nHello from webserver!";
-		// std::cout << ">>>> ANSWER: <<<<" << std::endl << answer << std::endl;
-		// std::cout << answer.length() << std::endl;
-		char *answer;
-		answer = (char *)malloc(sizeof(char) * 3000);
-		answer = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 21\n\nHello from webserver!";
+		std::string answer;
+        answer = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 21\n\nHello from webserver!";
 		std::cout << ">>>> ANSWER: <<<<" << std::endl << answer << std::endl;
-		write(tmpSocket, answer, strlen(answer));
+		write(tmpSocket, answer.c_str(), answer.length());
         close(tmpSocket);
     }
 }
