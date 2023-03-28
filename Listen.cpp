@@ -106,14 +106,23 @@ void readRequest(int readSocket)
 void answer(int readSocket)
 {
     std::string answer;
-
-    answer = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 21\n\nHello from webserver!";
+    
+    // answer = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 21\n\nHello from webserver!";
     std::cout << ">>>> ANSWER: <<<<" << std::endl << answer << std::endl;
+    std::ifstream file404("./www/404/404.html");
+    std::stringstream buffer;
+    buffer << file404.rdbuf();
+    int size = buffer.str().length();
+    std::cout << "PAGE_SIZE: " << size << std::endl;
+    answer = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 52381\n\n";
     write(readSocket, answer.c_str(), answer.length());
+    write(readSocket, buffer.str().c_str(), buffer.str().length());
+    std::cout << ">>>> ANSWER: <<<<" << std::endl << answer << std::endl;
+    // std::cout << ">>>> ANSWER: <<<<" << std::endl << buffer.str() << std::endl;
     close(readSocket);
 }
 
-void selectConnections(std::list<Socket *> sockets, fd_set *readFds, int * maxNum)
+void selectConnections(std::list<Socket *> sockets, fd_set *readFds, int *maxNum)
 {
     fd_set readFdsTmp;
     int readSocket;
