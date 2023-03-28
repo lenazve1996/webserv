@@ -25,6 +25,7 @@ public:
     void				listenSock( void );
     void				readRequest ( void );
     int					getFd( void );
+    struct sockaddr_in  *getAddress( void );
 
 private:
 
