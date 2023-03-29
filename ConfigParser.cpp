@@ -23,7 +23,7 @@ ConfigParser &ConfigParser::operator=(const ConfigParser &other) {
 
 void ConfigParser::_processConfig(std::string argv) {
   try {
-    if ((argv.size() - strlen(".conf") < 0) ||
+    if ((argv.size() < strlen(".conf")) ||
 		argv.substr((argv.size() - strlen(".conf")), strlen(".conf")) !=
         ".conf")
       throw std::invalid_argument("Wrong file extension");
