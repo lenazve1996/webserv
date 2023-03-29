@@ -32,8 +32,8 @@ Socket::~Socket()
 
 void Socket::bindSock( int port )
 {
-    _address.sin_family = AF_INET;
-    _address.sin_addr.s_addr = htonl(INADDR_ANY);
+    _address.sin_family = AF_INET; /* internetwork: UDP, TCP, etc. */
+    _address.sin_addr.s_addr = htonl(INADDR_ANY); 
     _address.sin_port = htons(port);
 
     if (bind(_fd, (struct sockaddr *)&_address, sizeof(_address)) < 0)
