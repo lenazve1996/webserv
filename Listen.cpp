@@ -8,22 +8,11 @@ void	sig_int_handler( int i )
     close(*TMP_SOCKET);
 }
 
-// std::list<int> createPortsList()
-// {
-//     std::list<int> examplePorts;
-//     examplePorts.push_back(8080);
-//     examplePorts.push_back(8081);
-//     examplePorts.push_back(8082);
-//     examplePorts.push_back(8083);
-//     Config fakeConfig = Config(examplePorts);
-
-//     return (fakeConfig.getPorts());
-// }
-
 std::list<Socket*> createSocketsList(ConfigParser _parser)
 {
     std::list<Socket*> sockets;
 
+    std::cout  << std::endl << ">>>> CREATING SOCKETS <<<<" << std::endl << std::endl;
     int numServs = _parser.getNumServs();
     for (int i = 0; i != numServs; i++)
     {
@@ -35,7 +24,7 @@ std::list<Socket*> createSocketsList(ConfigParser _parser)
     {
 
         (*sockets_it)->bindSock(_parser.getServersArray()[i]._port);
-        std::cout << "Binded port: " << _parser.getServersArray()[i]._port << std::endl;
+        std::cout << "Socket with fd " << (*sockets_it)->getFd() << " binded to port: " << _parser.getServersArray()[i]._port << std::endl;
         sockets_it++;
     }
     return (sockets);
@@ -57,7 +46,6 @@ void makeFdSet(std::list<Socket *> sockets, fd_set *readFds, int *maxNum)
     *maxNum = 0;
     for (sockets_it = sockets.begin(); sockets_it != sockets.end(); sockets_it++)
     {
-        std::cout << (*sockets_it)->getFd() << std::endl;
         FD_SET((*sockets_it)->getFd(), readFds);
         if ((*sockets_it)->getFd() > *maxNum)
             *maxNum = (*sockets_it)->getFd();
@@ -93,22 +81,37 @@ void readRequest(int readSocket)
     std::cout << ">>>> REQUEST: <<<<" << std::endl << std::endl  << buffer;
 }
 
-void answer(int readSocket)
+void successResponse(int readSocket)
 {
-    std::string answer;
-    
-    // answer = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 21\n\nHello from webserver!";
-    std::cout << ">>>> ANSWER: <<<<" << std::endl << answer << std::endl;
-    std::ifstream file404("./www/404/404.html");
+    std::string response;
+    response = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 21\n\nHello from webserver!";
+    std::cout << ">>>> RESPONSE: <<<<" << std::endl << response << std::endl;
+    write(readSocket, response.c_str(), response.length());
+}
+
+void errorResponse(int readSocket)
+{
+    std::string response;
+    std::ifstream file404("./www/404/error_404.html");
     std::stringstream buffer;
     buffer << file404.rdbuf();
     int size = buffer.str().length();
     std::cout << "PAGE_SIZE: " << size << std::endl;
-    answer = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 52381\n\n";
-    write(readSocket, answer.c_str(), answer.length());
+    response = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 52381\n\n";
+    write(readSocket, response.c_str(), response.length());
     write(readSocket, buffer.str().c_str(), buffer.str().length());
-    std::cout << ">>>> ANSWER: <<<<" << std::endl << answer << std::endl;
-    // std::cout << ">>>> ANSWER: <<<<" << std::endl << buffer.str() << std::endl;
+    std::cout << ">>>> RESPONSE: <<<<" << std::endl << response << std::endl;
+}
+
+void response(int readSocket)
+{
+    std::string response;
+    int statusCode = 200; //hardcode
+
+    if (statusCode == 200)
+        successResponse(readSocket);
+    else if (statusCode == 404)
+        errorResponse(readSocket);
     close(readSocket);
 }
 
@@ -117,7 +120,7 @@ void selectConnections(std::list<Socket *> sockets, fd_set *readFds, int *maxNum
     fd_set readFdsTmp;
     int readSocket;
     struct timeval tv;
-    tv.tv_sec = 10; 
+    tv.tv_sec = 20; 
     tv.tv_usec = 0;
     std::list<Socket *>::iterator sockets_it;
 
@@ -135,7 +138,7 @@ void selectConnections(std::list<Socket *> sockets, fd_set *readFds, int *maxNum
                 if (readSocket)
                 {
                     readRequest(readSocket);
-                    answer(readSocket);
+                    response(readSocket);
                 }
             }
         }

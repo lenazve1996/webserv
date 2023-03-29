@@ -1,18 +1,18 @@
 NAME		= webserv
 CC			= c++
 FLAGS		= -Wall -Wextra -std=c++98 -fsanitize=address -g #-Werror
-SRC			= main.cpp Config.cpp Location.cpp ConfigParser.cpp Listen.cpp Socket.cpp
+SRC			= main.cpp Config.cpp Location.cpp ConfigParser.cpp Listen.cpp Socket.cpp Print.cpp
 OBJ			= $(SRC:.cpp=.o)
-# Socket.cpp Listen.cpp 
+
 all : $(NAME)
 
 $(NAME) : $(OBJ)
 		$(CC) $(FLAGS) $(OBJ) -o $@ 
 
-%.o : %.cpp Config.hpp ConfigParser.hpp Location.hpp Listen.hpp Socket.hpp
+%.o : %.cpp Config.hpp ConfigParser.hpp Location.hpp Listen.hpp Socket.hpp Print.hpp
 		$(CC) $(FLAGS) -c $< -o $@
 
-# Socket.hpp Listen.hpp 
+
 clean :
 		rm -f $(OBJ)
 
