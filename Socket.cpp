@@ -9,7 +9,7 @@ Socket::Socket()
         perror("Socket creation failed");
     }
 	FD = &_fd;
-    // std::cout << "Number of the socket fd: " <<  _fd << std::endl;
+    std::cout << "Number of the socket fd: " <<  _fd << std::endl;
 	if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
 	{
 		perror("setsockopt for SO_REUSEADDR failed");

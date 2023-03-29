@@ -32,6 +32,7 @@ private:
     int                 _fd;
     struct sockaddr_in _address;
 
+
 };
 
 #endif

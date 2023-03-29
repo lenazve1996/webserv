@@ -557,3 +557,11 @@ void ConfigParser::processServerName(std::string dir, int ind, int arg_num, bool
 		this->_serversArray[ind]._serverName.push_back(args[i]);
 	}
 }
+
+std::vector<Config> ConfigParser::getServersArray(){
+	return this->_serversArray;
+}
+
+int ConfigParser::getNumServs(){
+	return this->_numServs;
+}

@@ -8,43 +8,34 @@ void	sig_int_handler( int i )
     close(*TMP_SOCKET);
 }
 
-void	redefine_signals()
-{
-	struct sigaction	sig_int;
-	sig_int.sa_flags = 0;
-	sig_int.sa_handler = sig_int_handler;
+// std::list<int> createPortsList()
+// {
+//     std::list<int> examplePorts;
+//     examplePorts.push_back(8080);
+//     examplePorts.push_back(8081);
+//     examplePorts.push_back(8082);
+//     examplePorts.push_back(8083);
+//     Config fakeConfig = Config(examplePorts);
 
-}
+//     return (fakeConfig.getPorts());
+// }
 
-std::list<int> createPortsList()
-{
-    std::list<int> examplePorts;
-    examplePorts.push_back(8080);
-    examplePorts.push_back(8081);
-    examplePorts.push_back(8082);
-    examplePorts.push_back(8083);
-    Config fakeConfig = Config(examplePorts);
-
-    return (fakeConfig.getPorts());
-}
-
-std::list<Socket*> createSocketsList(void)
+std::list<Socket*> createSocketsList(ConfigParser _parser)
 {
     std::list<Socket*> sockets;
-    std::list<int>::iterator ports_it;
 
-    std::list<int> configPorts = createPortsList(); 
-    for (ports_it = configPorts.begin(); ports_it != configPorts.end(); ports_it++)
+    int numServs = _parser.getNumServs();
+    for (int i = 0; i != numServs; i++)
     {
         sockets.push_back( new Socket());
     }
 
     std::list<Socket *>::iterator sockets_it = sockets.begin();
-    for (ports_it = configPorts.begin(); ports_it != configPorts.end(); ports_it++)
+    for (int i = 0; i != numServs; i++)
     {
 
-        (*sockets_it)->bindSock(*ports_it);
-        std::cout << "Binded port: " << *ports_it << std::endl;
+        (*sockets_it)->bindSock(_parser.getServersArray()[i]._port);
+        std::cout << "Binded port: " << _parser.getServersArray()[i]._port << std::endl;
         sockets_it++;
     }
     return (sockets);
@@ -62,7 +53,6 @@ void listenSockets(std::list<Socket *> sockets)
 void makeFdSet(std::list<Socket *> sockets, fd_set *readFds, int *maxNum)
 {
     FD_ZERO(readFds);
-    std::cout << "2 " << readFds << std::endl;
     std::list<Socket *>::iterator sockets_it = sockets.begin();
     *maxNum = 0;
     for (sockets_it = sockets.begin(); sockets_it != sockets.end(); sockets_it++)
@@ -158,7 +148,6 @@ void selectConnections(std::list<Socket *> sockets, fd_set *readFds, int *maxNum
 
 void handleConnections(std::list<Socket *> sockets)
 {
-
     fd_set *readFds = (fd_set *)malloc(sizeof(fd_set));
     int maxNum[1];
     makeFdSet(sockets, readFds, maxNum);
@@ -181,10 +170,11 @@ void freeSocketsList(std::list<Socket *> sockets)
     sockets.clear();
 }
 
-void listen_clients(void)
+void listen_clients(ConfigParser parser)
 {
-    std::list<Socket*> sockets = createSocketsList();
-    redefine_signals();
+    std::vector<Config> servers = parser.getServersArray();
+
+    std::list<Socket*> sockets = createSocketsList(parser);
     listenSockets(sockets);
     handleConnections(sockets);
     freeSocketsList(sockets);

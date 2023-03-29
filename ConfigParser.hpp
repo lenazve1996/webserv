@@ -68,6 +68,9 @@ public:
 	void processAutoindex(std::string dir, int ind, int arg_num, bool is_loc=false);
 	void processIndex(std::string dir, int ind, int arg_num, bool is_loc=false);
 
+	std::vector<Config> getServersArray();
+	int getNumServs();
+
 	bool checkIP(std::string ip);
 };
 
