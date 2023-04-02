@@ -22,7 +22,11 @@ Socket::Socket()
         close(_fd);
 		exit(EXIT_FAILURE);
 	}
-
+    // if (fcntl(_fd, F_SETFL, fcntl(_fd, F_GETFL, 0) | O_NONBLOCK) == -1){
+    //     perror("fcntl for O_NONBLOCK failed");
+    //     close(_fd);
+	// 	exit(EXIT_FAILURE);
+    // }
 }
 
 Socket::~Socket()

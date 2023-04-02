@@ -65,7 +65,6 @@ int acceptConnection(std::list<Socket *>::iterator socket, fd_set *readFds)
         }
     }
     return readSocket;
-
 }
 
 void readRequest(int readSocket)
@@ -75,7 +74,7 @@ void readRequest(int readSocket)
     int readResult = read(readSocket, buffer, 3999);
     if (readResult == -1)
     {
-        perror("Read func failed");     
+        perror("Read func failed"); 
         exit(EXIT_FAILURE);
     }
     std::cout << ">>>> REQUEST: <<<<" << std::endl << std::endl  << buffer;
@@ -118,18 +117,24 @@ void response(int readSocket)
 void selectConnections(std::list<Socket *> sockets, fd_set *readFds, int *maxNum)
 {
     fd_set readFdsTmp;
+    fd_set writeFds;
+    fd_set writeFdsTmp;
     int readSocket;
     struct timeval tv;
     tv.tv_sec = 20; 
     tv.tv_usec = 0;
     std::list<Socket *>::iterator sockets_it;
 
+
     memcpy(&readFdsTmp, readFds, sizeof(*readFds));
+    FD_ZERO(&writeFds);
+    FD_ZERO(&writeFdsTmp);
+    // memcpy(&writeFds, readFds, sizeof(*readFds));
     while (true)
     {
         std::cout  << std::endl << ">>>> WEBSERVER IS WAITING FOR NEW CONNECTION <<<<" << std::endl << std::endl;
-        int ret = select(*maxNum + 1, readFds, NULL, NULL, &tv);
-        if (ret)
+        int ret = select(*maxNum + 1, readFds, &writeFds, NULL, &tv);
+        if (ret > 0)
         {
             for (sockets_it = sockets.begin(); sockets_it != sockets.end(); sockets_it++)
             {
@@ -138,14 +143,22 @@ void selectConnections(std::list<Socket *> sockets, fd_set *readFds, int *maxNum
                 if (readSocket)
                 {
                     readRequest(readSocket);
+                    FD_SET(readSocket, &writeFds);
                     response(readSocket);
                 }
             }
         }
-        else
+        else if (ret < 0)
+        {
+            perror("Select func failed");
+            exit(EXIT_FAILURE);
+        }
+        else if (ret == 0)
             std::cout << "TIMEOUT" << std::endl;
         FD_ZERO(readFds);
+        FD_ZERO(&writeFds);
         memcpy(readFds, &readFdsTmp, sizeof(*readFds));
+        memcpy(&writeFds, &readFdsTmp, sizeof(*readFds));
     }
 }
 

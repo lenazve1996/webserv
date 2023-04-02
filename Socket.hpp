@@ -8,6 +8,7 @@
 #include <unistd.h> 
 #include <string.h>
 #include <stdio.h>
+#include <fcntl.h>
 #include <list>
 #include <string>
 #include <iostream>
