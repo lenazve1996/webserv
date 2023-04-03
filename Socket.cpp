@@ -68,7 +68,7 @@ void Socket::bindSock( int port )
     // _address.sin_addr.s_addr = ft_inet_addr("192.168.22.117"); // Можно установить ip адрес прямо из строки
     _address.sin_addr.s_addr = htonl(INADDR_ANY); // INADDR_ANY -- любой адрес, то же самое что и 0.0.0.0 (будут обратбатываться, и 127.0.0.1, и адрес локальной сети)
     _address.sin_port = htons(port); // port
-    printf("binding address is %s\n",inet_ntoa(_address.sin_addr)); // показать адрес
+    printf("binding address is %s\n", inet_ntoa(_address.sin_addr)); // показать адрес
 
     if (bind(_fd, (struct sockaddr *)&_address, sizeof(_address)) < 0)
     {
