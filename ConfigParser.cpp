@@ -210,8 +210,6 @@ void ConfigParser::processBlocks(std::string block, int server_index,
     }
     if (std::isalnum(block[i])) {
       type = block.substr(i, block.substr(i).find_first_of(" \t\n"));
-      //            dir_type = this->directiveTypes(block.substr(i,
-      //            block.substr(i).find_first_of(" \t\n")));
       dir_type = this->directiveTypes(type);
       if (dir_type == BAD_INSTRUCTIONS)
         throw std::runtime_error("Invalid instructions provided");
@@ -244,6 +242,8 @@ int ConfigParser::directiveTypes(std::string dir) {
     return (AUTOINDEX);
   else if (!dir.compare("index"))
     return (INDEX);
+  else if (!dir.compare("cgi_path") || !dir.compare("cgi_ext"))
+      return (CGI);
   else
     return (BAD_INSTRUCTIONS);
 }
@@ -260,33 +260,36 @@ int ConfigParser::processInstructions(int type, std::string dir, int ind,
   args = extractArgs(dir, ';').size();
   dir_len = dir.substr(0, dir.find(";")).size() + 1;
   switch (type) {
-  case (LISTEN):
-    this->processListen(dir, ind, args, is_loc);
-    break;
-  case (ROOT):
-    this->processRoot(dir, ind, args, is_loc);
-    break;
-  case (SERVER_NAME):
-    this->processServerName(dir, ind, args, is_loc);
-    break;
-  case (ERR_PAGE):
-    this->processErrorPage(dir, ind, args, is_loc);
-    break;
-  case (CLIENT_BODY_SIZE):
-    this->processBodySize(dir, ind, args, is_loc);
-    break;
-  case (AUTOINDEX):
-    this->processAutoindex(dir, ind, args, is_loc);
-    break;
-  case (INDEX):
-    this->processIndex(dir, ind, args, is_loc);
-    break;
-  case (ALLOW_METHODS):
-    this->processAllow(dir, ind, args, is_loc);
-    break;
-    //		default:
-    //			throw std::runtime_error("Invalid instructions");
-    //			break;
+    case (LISTEN):
+        this->processListen(dir, ind, args, is_loc);
+        break;
+    case (ROOT):
+        this->processRoot(dir, ind, args, is_loc);
+        break;
+    case (SERVER_NAME):
+        this->processServerName(dir, ind, args, is_loc);
+        break;
+    case (ERR_PAGE):
+        this->processErrorPage(dir, ind, args, is_loc);
+        break;
+    case (CLIENT_BODY_SIZE):
+        this->processBodySize(dir, ind, args, is_loc);
+        break;
+    case (AUTOINDEX):
+        this->processAutoindex(dir, ind, args, is_loc);
+        break;
+    case (INDEX):
+        this->processIndex(dir, ind, args, is_loc);
+        break;
+    case (ALLOW_METHODS):
+        this->processAllow(dir, ind, args, is_loc);
+        break;
+    case (CGI):
+        this->processCGI(dir, ind, args, is_loc);
+        break;
+    default:
+        throw std::runtime_error("Invalid instructions");
+        break;
   }
   return (dir_len);
 }
@@ -538,7 +541,7 @@ void ConfigParser::processIndex(std::string dir, int ind, int arg_num,
   std::vector<std::string> values;
 
   if (arg_num < 2)
-    throw std::runtime_error("Wrong number of index aruments");
+    throw std::runtime_error("Wrong number of index arguments");
   args = this->extractArgs(dir, ';');
   for (std::size_t i = 1; i < args.size(); i++)
     values.push_back(args[i]);
@@ -564,7 +567,7 @@ void ConfigParser::processAllow(std::string dir, int ind, int arg_num,
   std::vector<std::string> args;
 
   if (arg_num < 2)
-    throw std::runtime_error("Wrong number of aruments in allow_methods");
+    throw std::runtime_error("Wrong number of arguments in allow_methods");
   args = this->extractArgs(dir, ';');
   if (is_loc && !this->_serversArray[ind]
                      ._locations[this->_serversArray[ind]._locations.size() - 1]
@@ -576,7 +579,7 @@ void ConfigParser::processAllow(std::string dir, int ind, int arg_num,
     this->_serversArray[ind]._allowedMethods.clear();
 
   for (std::size_t i = 1; i < args.size(); i++) {
-    if (args[i].compare("GET") && args[i].compare("POST")) // TODO DELETE???
+    if (args[i].compare("GET") && args[i].compare("POST") && args[i].compare("DELETE"))
       throw std::runtime_error(
           "Wrong type of expression provided for allowed_methods");
     if (is_loc)
@@ -614,3 +617,27 @@ std::vector<Config> ConfigParser::getServersArray() {
 }
 
 int ConfigParser::getNumServs() { return this->_numServs; }
+
+void ConfigParser::processCGI(std::string dir, int ind, int arg_num, bool is_loc) {
+    std::vector<std::string>    args;
+
+    if (arg_num < 2)
+        throw std::runtime_error("Wrong amount of arguments in cgi directive");
+    args = this->extractArgs(dir, ';');
+    if (!args[0].compare("cgi_path")){
+        if (is_loc && !this->_serversArray[ind]._locations[this->_serversArray[ind]._locations.size() - 1]._cgiPath.empty())
+            this->_serversArray[ind]._locations[this->_serversArray[ind]._locations.size() - 1]._cgiPath.clear();
+        for (std::size_t j=1; j < args.size(); j++) {
+            this->_serversArray[ind]._locations[this->_serversArray[ind]._locations.size() - 1]._cgiPath.push_back(
+                    args[j]);
+        }
+    }
+    else if (!args[0].compare("cgi_ext")){
+        if (is_loc && !this->_serversArray[ind]._locations[this->_serversArray[ind]._locations.size() - 1]._cgiExt.empty())
+            this->_serversArray[ind]._locations[this->_serversArray[ind]._locations.size() - 1]._cgiExt.clear();
+        for (std::size_t j=1; j < args.size(); j++)
+            this->_serversArray[ind]._locations[this->_serversArray[ind]._locations.size()-1]._cgiExt.push_back(args[j]);
+    }
+    else
+        throw std::runtime_error("Wrong cgi directives provided");
+}

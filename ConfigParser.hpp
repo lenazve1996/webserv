@@ -20,6 +20,7 @@
 #define ALLOW_METHODS 7
 #define AUTOINDEX	8
 #define INDEX	9
+#define CGI     10
 #define BAD_INSTRUCTIONS	0
 
 class ConfigParser {
@@ -67,8 +68,10 @@ public:
 	void processAllow(std::string dir, int ind, int arg_num, bool is_loc=false);
 	void processAutoindex(std::string dir, int ind, int arg_num, bool is_loc=false);
 	void processIndex(std::string dir, int ind, int arg_num, bool is_loc=false);
+    void processCGI(std::string dir, int ind, int arg_num, bool is_loc=false);
 
-	std::vector<Config> getServersArray();
+
+    std::vector<Config> getServersArray();
 	int getNumServs();
 
 	bool checkIP(std::string ip);

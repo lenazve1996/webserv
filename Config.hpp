@@ -23,34 +23,9 @@ public:
     bool    _autoindex;
     std::vector<Location> _locations;
     bool 	_defaultServer;
-};
 
-//class Config {
-//
-//public:
-//
-//    Config();
-//    ~Config();
-//    Config(Config const &other);
-//    Config operator=(Config const &other);
-//
-//    int		getPort( void );
-//    std::string getHost(void);
-//    int     getBodySize(void);
-//
-//private:
-//
-//    int		    _port;
-//    std::string _host;
-//    std::vector<std::string> _serverName;
-//    int         _bodySize;
-//    std::vector<std::vector<std::string> > _errorPages;
-//    std::string _root;
-//    std::vector<std::string>    _allowedMethods;
-//    std::vector<std::string>    _index;
-//    bool    _autoindex;
-//	std::vector<Location> _locations;
-//	bool 	_defaultServer;
-//};
+    Config();
+    ~Config();
+};
 
 #endif

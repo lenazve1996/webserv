@@ -4,28 +4,13 @@
 
 #include "Config.hpp"
 
-//Config::Config(){}
-//
-//Config::~Config() {}
-//
-//Config::Config(const Config &other) {
-//    this->_port = other._port;
-//    this->_host = other._host;
-//    this->_bodySize = other._bodySize;
-//}
-//Config Config::operator=(const Config &other) {
-//    *this = Config(other);
-//    return *this;
-//}
+Config::Config(): _host(std::string("0.0.0.0")), _serverName(std::vector<std::string>()), _errorPages(std::vector<std::vector<std::string> >()),   _root(std::string()),
+                  _allowedMethods(std::vector<std::string>()), _index(std::vector<std::string>()),
+                  _locations(std::vector<Location>()){
+    this->_port = 80;
+    this->_defaultServer = false;
+    this->_autoindex = false;
+    this->_bodySize = 1000000;
+}
 
-//int Config::getPort( void )
-//{
-//    return _port;
-//}
-//
-//std::string Config::getHost() {
-//    return _host;
-//}
-//int Config::getBodySize() {
-//    return _bodySize;
-//}
+Config::~Config() {}
