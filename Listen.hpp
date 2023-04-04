@@ -5,6 +5,7 @@
 #include "Socket.hpp"
 #include "Config.hpp"
 #include "ConfigParser.hpp"
+#include "HttpRequest.hpp"
 #include <sys/types.h>
 #include <fstream> 
 #include <poll.h>

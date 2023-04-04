@@ -172,7 +172,14 @@ void selectConnections(std::list<Socket *> sockets, fd_set *masterFds, int *maxN
                 if (FD_ISSET(*it, &readFds))
                 {
                     std::cout << "Reading from fd " << *it << std::endl;
-                    readRequest(*it);
+                    HttpRequest *request = new HttpRequest(*it);
+                    request->readRequest();
+                    request->parse();
+                    // std::cout << request->getFd() << std::endl;
+                    // std::cout << request->getProtocol()  << std::endl;
+                    // std::cout << request->getBody() << std::endl;
+
+                    // readRequest(*it);
                     FD_SET(*it, &masterWriteFds);
                 }
             }
