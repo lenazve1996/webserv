@@ -22,7 +22,7 @@ Socket::Socket()
         close(_fd);
 		exit(EXIT_FAILURE);
 	}
-    // if (fcntl(_fd, F_SETFL, fcntl(_fd, F_GETFL, 0) | O_NONBLOCK) == -1){
+    // if (fcntl(_fd, F_SETFL, O_NONBLOCK) == -1){
     //     perror("fcntl for O_NONBLOCK failed");
     //     close(_fd);
 	// 	exit(EXIT_FAILURE);
@@ -80,7 +80,7 @@ void Socket::bindSock( int port )
 
 void Socket::listenSock( void )
 {
-    if (listen(_fd, 10) > 0)
+    if (listen(_fd, 40) > 0)
     {
         perror("listen func failed");
         close(_fd);

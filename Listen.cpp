@@ -63,15 +63,24 @@ int acceptConnection(std::list<Socket *>::iterator socket, fd_set *readFds)
             perror("Accept func failed");
             exit(EXIT_FAILURE);
         }
+        std::cout << " >>>>>>>>>>> readSocket from accept() is: " << readSocket << " <<<<<<<<<<<<<" << std::endl;
     }
     return readSocket;
 }
 
 void readRequest(int readSocket)
 {
-    char buffer[4000];
+    char buffer[1025];
+    bzero(buffer, 1025);
 
-    int readResult = read(readSocket, buffer, 3999);
+    // int readResult = read(readSocket, buffer, 1024;
+    // if (readResult == -1)
+    // {
+    //     perror("Read func failed"); 
+    //     exit(EXIT_FAILURE);
+    // }
+
+    int readResult = recv(readSocket, buffer, 1024, 0);
     if (readResult == -1)
     {
         perror("Read func failed"); 
@@ -83,7 +92,7 @@ void readRequest(int readSocket)
 void successResponse(int readSocket)
 {
     std::string response;
-    response = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 21\n\nHello from webserver!";
+    response = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 21\n\nHello from webserver!'n'\n\n";
     std::cout << ">>>> RESPONSE: <<<<" << std::endl << response << std::endl;
     write(readSocket, response.c_str(), response.length());
 }
@@ -114,38 +123,78 @@ void response(int readSocket)
     close(readSocket);
 }
 
-void selectConnections(std::list<Socket *> sockets, fd_set *readFds, int *maxNum)
+void selectConnections(std::list<Socket *> sockets, fd_set *masterFds, int *maxNum)
 {
-    fd_set readFdsTmp;
+    fd_set readFds;
     fd_set writeFds;
-    fd_set writeFdsTmp;
+    fd_set masterWriteFds;
     int readSocket;
     struct timeval tv;
-    tv.tv_sec = 20; 
+    tv.tv_sec = 30; 
     tv.tv_usec = 0;
     std::list<Socket *>::iterator sockets_it;
+    std::list<int> acceptedConnections;
 
-
-    memcpy(&readFdsTmp, readFds, sizeof(*readFds));
+    FD_ZERO(&readFds);
     FD_ZERO(&writeFds);
-    FD_ZERO(&writeFdsTmp);
-    // memcpy(&writeFds, readFds, sizeof(*readFds));
+    FD_ZERO(&masterWriteFds);
     while (true)
     {
+        readFds = *masterFds;
+        writeFds = masterWriteFds;
         std::cout  << std::endl << ">>>> WEBSERVER IS WAITING FOR NEW CONNECTION <<<<" << std::endl << std::endl;
-        int ret = select(*maxNum + 1, readFds, &writeFds, NULL, &tv);
+        int ret = select(*maxNum + 1, &readFds, &writeFds, NULL, NULL);
         if (ret > 0)
         {
             for (sockets_it = sockets.begin(); sockets_it != sockets.end(); sockets_it++)
             {
-                std::cout << "FD_ISSET status: for " << (*sockets_it)->getFd() << " is " << FD_ISSET((*sockets_it)->getFd(), readFds) << std::endl;
-                readSocket = acceptConnection(sockets_it, readFds);
-                if (readSocket)
+                std::cout << "FD_ISSET status: for masterFd " << (*sockets_it)->getFd() << " is " << FD_ISSET((*sockets_it)->getFd(), &readFds) << std::endl;
+                readSocket = acceptConnection(sockets_it, &readFds);
+                if (readSocket != 0)
                 {
-                    readRequest(readSocket);
-                    FD_SET(readSocket, &writeFds);
-                    response(readSocket);
+                    FD_SET(readSocket, masterFds);
+                    acceptedConnections.push_back(readSocket);
                 }
+                if (readSocket > *maxNum)
+                {
+                    *maxNum = readSocket;
+                }
+                if (fcntl(readSocket, F_SETFL, O_NONBLOCK) == -1)
+                {
+                    perror("fcntl for O_NONBLOCK failed");
+                    exit(EXIT_FAILURE);
+                }
+            }
+            std::list<int>::iterator it;
+            for (it = acceptedConnections.begin(); it != acceptedConnections.end(); it++)
+            {
+                std::cout << "FD_ISSET status: for readFd " << *it << " is " << FD_ISSET(*it, &readFds) << std::endl;
+                if (FD_ISSET(*it, &readFds))
+                {
+                    std::cout << "Reading from fd " << *it << std::endl;
+                    readRequest(*it);
+                    FD_SET(*it, &masterWriteFds);
+                }
+            }
+            std::list<int>::iterator tmp;
+            int flag = 0;
+            for (it = acceptedConnections.begin(); it != acceptedConnections.end(); it++)
+            {
+                std::cout << "FD_ISSET status: for writeFd " << *it << " is " << FD_ISSET(*it, &writeFds) << std::endl;
+                if (FD_ISSET(*it, &writeFds))
+                {
+                    flag = 1;
+                    tmp = it;
+                    response(*it);
+                    close (*it);
+                    FD_CLR(*it, &masterWriteFds);
+                    FD_CLR(*it, masterFds);
+                }
+            }
+            if (flag)
+            {
+                acceptedConnections.erase(tmp);
+                flag = 0;
             }
         }
         else if (ret < 0)
@@ -155,20 +204,18 @@ void selectConnections(std::list<Socket *> sockets, fd_set *readFds, int *maxNum
         }
         else if (ret == 0)
             std::cout << "TIMEOUT" << std::endl;
-        FD_ZERO(readFds);
+        FD_ZERO(&readFds);
         FD_ZERO(&writeFds);
-        memcpy(readFds, &readFdsTmp, sizeof(*readFds));
-        memcpy(&writeFds, &readFdsTmp, sizeof(*readFds));
     }
 }
 
 void handleConnections(std::list<Socket *> sockets)
 {
-    fd_set *readFds = (fd_set *)malloc(sizeof(fd_set));
+    fd_set *masterFds = (fd_set *)malloc(sizeof(fd_set));
     int maxNum[1];
-    makeFdSet(sockets, readFds, maxNum);
-    selectConnections(sockets, readFds, maxNum);
-    free(readFds);
+    makeFdSet(sockets, masterFds, maxNum);
+    selectConnections(sockets, masterFds, maxNum);
+    free(masterFds);
 }
 
 void freeSocketsList(std::list<Socket *> sockets)
