@@ -1,6 +1,3 @@
-#ifndef HTTP_REQEST_CPP
-#define HTTP_REQEST_CPP
-
 #include "./HttpRequest.hpp"
 
 HttpRequest::HttpRequest(int fd) {
@@ -147,7 +144,7 @@ void HttpRequest::parse() {
 
 int HttpRequest::checkStartString(Config &config) {
   if (std::find(config._allowedMethods.begin(), config._allowedMethods.end(),
-                _requestType) != config._allowedMethods.end())
+                _requestType) == config._allowedMethods.end())
     return (405);
   if (_protocol != "HTTP/1.1")
     return (400);
@@ -156,7 +153,7 @@ int HttpRequest::checkStartString(Config &config) {
 
 int HttpRequest::checkHost(Config &config) {
   if (std::find(config._serverName.begin(), config._serverName.end(),
-                this->_host) != config._serverName.end())
+                this->_host) == config._serverName.end())
     return (404);
   return (200);
 }
@@ -190,5 +187,3 @@ std::string HttpRequest::getBody() const { return (_body); }
 int HttpRequest::getFd() const { return (_fd); }
 
 HttpRequest::~HttpRequest() {}
-
-#endif
