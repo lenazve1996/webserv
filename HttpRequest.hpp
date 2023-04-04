@@ -1,6 +1,8 @@
 #ifndef HTTP_REQEST_HPP
 #define HTTP_REQEST_HPP
 
+#include "Config.hpp"
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -21,7 +23,12 @@ private:
   // void parseMethod();
   void parseStartString(const std::string &header);
   void parseHeaders(const std::vector<std::string> &splittedRequest);
-  void parseBody(std::vector<std::string> &splittedRequest);
+  void parseBody(const std::vector<std::string> &splittedRequest);
+
+  int checkStartString(Config &config);
+  int checkHost(Config &config);
+
+  void print();
 
 public:
   //   HttpRequest();

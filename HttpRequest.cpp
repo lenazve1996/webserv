@@ -107,7 +107,6 @@ void HttpRequest::parseStartString(const std::string &header) {
 
 void HttpRequest::parseHeaders(
     const std::vector<std::string> &splittedRequest) {
-  std::string hostLine;
   size_t i;
   size_t j;
 
@@ -119,13 +118,13 @@ void HttpRequest::parseHeaders(
         j++;
       while (splittedRequest[i][j] && ft_isspace(splittedRequest[i][j]))
         j++;
-      _host = &(splittedRequest[i][j]);
+      _host = splittedRequest[i][j];
     }
   }
 }
 
-void HttpRequest::parseBody(std::vector<std::string> &splittedRequest) {
-  std::vector<std::string>::iterator it;
+void HttpRequest::parseBody(const std::vector<std::string> &splittedRequest) {
+  std::vector<std::string>::const_iterator it;
   _body = "";
 
   it = splittedRequest.begin();
@@ -142,6 +141,24 @@ void HttpRequest::parse() {
   parseStartString(splittedRequest[0]);
   parseHeaders(splittedRequest);
   parseBody(splittedRequest);
+  _request.clear();
+  print();
+}
+
+int HttpRequest::checkStartString(Config &config) {
+  if (std::find(config._allowedMethods.begin(), config._allowedMethods.end(),
+                _requestType) != config._allowedMethods.end())
+    return (405);
+  if (_protocol != "HTTP/1.1")
+    return (400);
+  return (200);
+}
+
+int HttpRequest::checkHost(Config &config) {
+  if (std::find(config._serverName.begin(), config._serverName.end(),
+                this->_host) != config._serverName.end())
+    return (404);
+  return (200);
 }
 
 HttpRequest &HttpRequest::operator=(const HttpRequest &otherRequest) {
@@ -153,6 +170,15 @@ HttpRequest &HttpRequest::operator=(const HttpRequest &otherRequest) {
   this->_host = otherRequest.getHost();
   this->_body = otherRequest.getBody();
   return (*this);
+}
+
+void HttpRequest::print() {
+  std::cout << this->getRequest() << std::endl;
+  std::cout << this->getRequestType() << std::endl;
+  std::cout << this->getURI() << std::endl;
+  std::cout << this->getProtocol() << std::endl;
+  std::cout << this->getHost() << std::endl;
+  std::cout << this->getBody() << std::endl;
 }
 
 std::string HttpRequest::getRequest() const { return (_request); }
