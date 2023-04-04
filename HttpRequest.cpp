@@ -113,9 +113,11 @@ void HttpRequest::parseHeaders(
       j = 3;
       while ((*it)[j] && (*it)[j] != ':')
         j++;
+      if((*it)[j] && (*it)[j] == ':')
+        j++;
       while ((*it)[j] && ft_isspace((*it)[j]))
         j++;
-      _host = (*it)[j];
+      _host = (*it).c_str() + j;
       return;
     }
     it++;
@@ -140,10 +142,9 @@ void HttpRequest::parseBody(const std::vector<std::string> &splittedRequest) {
 void HttpRequest::parse() {
   std::vector<std::string> splittedRequest = split(_request, '\n');
   parseStartString(splittedRequest[0]);
-  std::cout << "parsing headers..." << std::endl;
   parseHeaders(splittedRequest);
-  std::cout << "parsing the body" << std::endl;
   parseBody(splittedRequest);
+  std::cout << "The whole request:\n" << _request << "||||||||||" << std::endl;
   _request.clear();
   print();
 }
