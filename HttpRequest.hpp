@@ -25,8 +25,6 @@ private:
   void parseHeaders(const std::vector<std::string> &splittedRequest);
   void parseBody(const std::vector<std::string> &splittedRequest);
 
-  int checkStartString(Config &config);
-  int checkHost(Config &config);
 
   void print();
 
@@ -39,6 +37,9 @@ public:
   void reset(int fd);
   void readRequest();
   void parse();
+
+  int checkStartString(Config &config);
+  int checkHost(Config &config);
 
   std::string getRequest() const;
   std::string getRequestType() const;

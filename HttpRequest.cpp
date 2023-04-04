@@ -146,7 +146,7 @@ int HttpRequest::checkStartString(Config &config) {
   if (std::find(config._allowedMethods.begin(), config._allowedMethods.end(),
                 _requestType) == config._allowedMethods.end())
     return (405);
-  if (_protocol != "HTTP/1.1")
+  if (_protocol != "HTTP/1.1\n")
     return (400);
   return (200);
 }
