@@ -108,7 +108,7 @@ void HttpRequest::parseHeaders(
   size_t j;
 
   it = splittedRequest.begin();
-  while (it != splittedRequest.end() || (*it) != "\n") {
+  while (it != splittedRequest.end() || (*it) == "\n") {
     if (it->rfind("Host:", 0) == 0) {
       j = 3;
       while ((*it)[j] && (*it)[j] != ':')
@@ -116,8 +116,12 @@ void HttpRequest::parseHeaders(
       while ((*it)[j] && ft_isspace((*it)[j]))
         j++;
       _host = (*it)[j];
+      return;
     }
+    it++;
   }
+  _host = "";
+  return;
 }
 
 void HttpRequest::parseBody(const std::vector<std::string> &splittedRequest) {
@@ -125,7 +129,7 @@ void HttpRequest::parseBody(const std::vector<std::string> &splittedRequest) {
   _body = "";
 
   it = splittedRequest.begin();
-  while (*it != "\n") {
+  while (it != splittedRequest.end() && (*it) != "\n") {
     it++;
   }
   while (it != splittedRequest.end()) {
@@ -136,7 +140,9 @@ void HttpRequest::parseBody(const std::vector<std::string> &splittedRequest) {
 void HttpRequest::parse() {
   std::vector<std::string> splittedRequest = split(_request, '\n');
   parseStartString(splittedRequest[0]);
+  std::cout << "parsing headers..." << std::endl;
   parseHeaders(splittedRequest);
+  std::cout << "parsing the body" << std::endl;
   parseBody(splittedRequest);
   _request.clear();
   print();
