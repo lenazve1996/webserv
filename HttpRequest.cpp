@@ -104,18 +104,18 @@ void HttpRequest::parseStartString(const std::string &header) {
 
 void HttpRequest::parseHeaders(
     const std::vector<std::string> &splittedRequest) {
-  size_t i;
+  std::vector<std::string>::const_iterator it;
   size_t j;
 
-  i = 0;
-  while (splittedRequest[i++] != "\n") {
-    if (splittedRequest[i].rfind("Host:", 0) == 0) {
+  it = splittedRequest.begin();
+  while (it != splittedRequest.end() || (*it) != "\n") {
+    if (it->rfind("Host:", 0) == 0) {
       j = 3;
-      while (splittedRequest[i][j] && splittedRequest[i][j] != ':')
+      while ((*it)[j] && (*it)[j] != ':')
         j++;
-      while (splittedRequest[i][j] && ft_isspace(splittedRequest[i][j]))
+      while ((*it)[j] && ft_isspace((*it)[j]))
         j++;
-      _host = splittedRequest[i][j];
+      _host = (*it)[j];
     }
   }
 }
